@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="shortcut icon"
+      href="https://meteoclari.it/wp-content/uploads/2020/11/WhatsApp-icon-PNG.png"
+      type="image/x-icon"
+    />
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.7.1/css/all.css"
+      integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="./css/style.css" />
+    <!-- CDN DateJS -->
+    <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+    <!-- CDN VueJS x l'estensione di chrome -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <title>Boolzapp Alessandro Desdieri</title>
+  </head>
+  <body>
+    <!-- App VueJS -->
+    <!-- #app 100vh -->
+    <div id="app">
+      <header></header>
+      <!-- container big absolute -->
+      <div class="container-big d-flex">
+        <!-- sidebar -->
+        <div class="container-sidebar">
+          <!-- user panel side -->
+          <div class="d-flex align-items-center py-2 panel-bar">
+            <div class="d-flex align-items-center user-info">
+              <img
+                src="./img/avatar_io.jpg"
+                class="img-avatar user-avatar mx-2"
+                alt=""
+              />
+              <div class="px-3 bold-text">Nome Utente</div>
+            </div>
+            <!-- icons -->
+            <div class="d-flex user-icons">
+              <i class="fas fa-circle-notch px-2"></i>
+              <i class="fas fa-comment-alt px-2"></i>
+              <i class="fas fa-ellipsis-v px-2 mx-2"></i>
+            </div>
+          </div>
+          <!-- notifications bar -->
+          <div class="d-flex align-items-center py-2 notification-bar">
+            <!-- bell icon -->
+            <i class="fas fa-bell-slash bell-icon p-2 mx-3"></i>
+            <div>
+              <div class="bold-text">Ricevi notifiche di nuovi messaggi</div>
+              <a href="#" class="text-secondary"> Attiva notifiche desktop </a>
+            </div>
+          </div>
+          <!-- search bar -->
+          <div class="search-bar p-2">
+            <div class="internal-search d-flex align-items-center px-2">
+              <i class="fas fa-search px-2" id="lens-sidebar"></i>
+              <!-- input search -->
+              <input
+                class="flex-grow-1 py-1"
+                placeholder="Cerca o inizia una nuova chat"
+                type="text"
+                name=""
+                id=""
+                v-model="searchInput"
+              />
+            </div>
+          </div>
+          <!-- users bar -->
+          <div class="users-bar">
+            <!-- funzione per l'assegnazione di un indice al click su un utente -->
+            <div
+              v-for="(contact, index) in contacts"
+              class="user-chat"
+              @click="indexAssignment(index)"
+              :class="{'active-user': currentIndex === index}"
+              v-if="filterList(contact)"
+            >
+              <img
+                :src="['img/avatar' + contact.avatar]"
+                class="img-avatar mx-3 py-2"
+                alt=""
+              />
+              <div class="p-2 bold-text">{{contact.name}}</div>
+            </div>
+          </div>
+        </div>
+        <!-- main space -->
+        <main class="container-chat">
+          <div class="chat-box-above">
+            <!-- panel bar chat -->
+            <div
+              class="d-flex justify-content-between align-items-center py-2 panel-bar"
+            >
+              <div class="d-flex align-items-center">
+                <img
+                  :src="['img/avatar' + contacts[currentIndex].avatar]"
+                  class="img-avatar user-avatar mx-2"
+                  alt=""
+                />
+                <div class="px-3 contact-info">
+                  <div class="bold-text">{{contacts[currentIndex].name}}</div>
+                  <div class="text-secondary">
+                    Ultimo accesso: {{lastMessageDate(currentIndex)}}
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex">
+                <!-- icons -->
+                <i class="fas fa-search px-2"></i>
+                <i class="fas fa-paperclip px-2"></i>
+                <i class="fas fa-ellipsis-v px-2 mx-2"></i>
+              </div>
+            </div>
+            <!-- chat space -->
+            <div class="chat-space p-5">
+              <!-- Messages -->
+              <div
+                v-for="(message, i) in contacts[currentIndex].messages"
+                class="clear-fix"
+              >
+                <div class="p-2 my-2 message-template" :class="message.status">
+                  <div class="text-message">{{message.text}}</div>
+                  <i
+                    @click="modalAppear(i)"
+                    class="fas fa-chevron-down chevron"
+                  ></i>
+                  <div class="d-flex text-secondary justify-content-end">
+                    {{message.date}}
+                  </div>
+                  <div
+                    class="moda-l"
+                    v-if="i === messageIndex && modalValue === true"
+                  >
+                    <div class="p-2">Message info</div>
+                    <div @click="removeMessage(i)" class="p-2">
+                      Delete Message
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Chat box below -->
+          <div class="panel-bar chat-box-below">
+            <div class="d-flex align-items-center h-100">
+              <i class="far fa-smile px-4"></i>
+              <!-- input new message -->
+              <input
+                placeholder="Scrivi un messaggio"
+                class="flex-grow-1 p-2 rounded"
+                type="text"
+                name=""
+                v-model="temporaryMessage"
+                @keyup.enter="newMessage()"
+              />
+              <i class="fas fa-microphone-alt px-4"></i>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script src="./js/script.js"></script>
+  </body>
+</html>
